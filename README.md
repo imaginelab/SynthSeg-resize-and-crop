@@ -1,0 +1,1 @@
+# SynthSeg-resize-and-crop
