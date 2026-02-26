@@ -6,7 +6,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  reconall-clinical-resampling.sh [options]
+  SSr-resize-and-crop.sh [options]
 
 Required arguments:
   --subid SUBID                    e.g. sub-001
@@ -26,13 +26,13 @@ Example:
   reconall-clinical-resampling.sh \
     --subid sub-123456 \
     --age_days 180 \
-    --input_file /data/sub-123456/..._T2w.nii.gz \
+    --input_file sub-12345_ses-01_..._T2w.nii.gz \
     --modality T2w \
     --scale 0.5 \
-    --outdir /out/sub-123456/ses-1 \
+    --outdir /out/sub-123456/ses-01/ \
     --fs_singularity /tools/freesurfer/freesurfer_7.4.1.sif \
     --fs_license /tools/freesurfer/license.txt \
-    --toolpath /tools/reconall-clinical-resampling \
+    --toolpath /tools/SynthSeg-resize-and-crop/ \
 EOF
 }
 
