@@ -10,7 +10,7 @@ Usage:
 
 Required arguments:
   --subid SUBID                    e.g. sub-001
-  --age_days AGE                   integer days
+  --age_days AGE                   integer age in postmenstrual days
   --input_file PATH                path to input NIfTI (.nii.gz)
   --modality MOD                   T1w | T2w | FLAIR | ...
   --outdir PATH                    output directory
@@ -25,7 +25,7 @@ Optional:
 Example:
   reconall-clinical-resampling.sh \
     --subid sub-123456 \
-    --age_days 180 \
+    --age_days 300 \
     --input_file sub-12345_ses-01_..._T2w.nii.gz \
     --modality T2w \
     --scale 0.5 \
