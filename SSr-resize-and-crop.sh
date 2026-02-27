@@ -13,13 +13,13 @@ Required arguments:
   --age_days AGE                   integer days
   --input_file PATH                path to input NIfTI (.nii.gz)
   --modality MOD                   T1w | T2w | FLAIR | ...
-  --scale SCALE                    e.g. 0.5
   --outdir PATH                    output directory
   --fs_singularity PATH            path to FreeSurfer Singularity (.sif)
   --fs_license PATH                FreeSurfer license.txt
   --toolpath PATH                  path to tool folder
 
 Optional:
+  --scale SCALE                    scaling factor (default: 0.5)
   -h, --help                       show this help and exit
 
 Example:
@@ -40,7 +40,7 @@ die() { echo "ERROR: $*" >&2; exit 2; }
 
 # -------------------- defaults --------------------
 SUBID=""; AGE_DAYS=""; INPUT_FILE=""; MODALITY=""
-SCALE=""; OUTDIR=""; FS_SINGULARITY=""
+SCALE=0.5; OUTDIR=""; FS_SINGULARITY=""
 FS_LICENSE=""; TOOLPATH=""
 
 # -------------------- parse arguments --------------------
@@ -85,7 +85,6 @@ done
 [[ -n "$AGE_DAYS"       ]] || die "--age_days is required"
 [[ -n "$INPUT_FILE"     ]] || die "--input_file is required"
 [[ -n "$MODALITY"       ]] || die "--modality is required"
-[[ -n "$SCALE"          ]] || die "--scale is required"
 [[ -n "$OUTDIR"         ]] || die "--outdir is required"
 [[ -n "$FS_SINGULARITY" ]] || die "--fs_singularity is required"
 [[ -n "$FS_LICENSE"     ]] || die "--fs_license is required"
@@ -97,6 +96,7 @@ done
 [[ -f "$FS_LICENSE"     ]] || die "fs_license not found: $FS_LICENSE"
 [[ -d "$TOOLPATH"       ]] || die "toolpath not found: $TOOLPATH"
 
+echo "Using scale: $SCALE"
 
 now=$(date +"%T")
 echo "Start time : $now"
@@ -183,6 +183,7 @@ resampled_scan=${scan_identifier}_res-${scale_factor}_${MODALITY}
 output_file=${OUTDIR}/${resampled_scan}/${resampled_scan}.nii.gz
 
 mkdir -p ${OUTDIR}/${resampled_scan}/
+cp ${INPUT_FILE} ${OUTDIR}/${resampled_scan}/${scan_identifier}_desc-native_${MODALITY}.nii.gz
 python ${TOOLPATH}/change-resolution-header.py -i ${INPUT_FILE} -o ${output_file} -s ${scale_factor}
 
 now=$(date +"%T")
@@ -256,8 +257,10 @@ inv_resolution=$(printf '%s / %s\n' "1" "$scale_factor" | bc -l)
 
 echo "Resampled segementation file to input file space"
 
-segmentation_inverse=${preprocessed_identifier}_desc-inverse_seg.nii.gz
-segmentation_native=${preprocessed_identifier}_desc-native_seg.nii.gz
+segmentation_inverse=${scan_identifier}_desc-inverse_${MODALITY}_seg.nii.gz
+segmentation_native=${scan_identifier}_desc-native_${MODALITY}_seg.nii.gz
+#segmentation_inverse=${preprocessed_identifier}_desc-inverse_seg.nii.gz
+#segmentation_native=${preprocessed_identifier}_desc-native_seg.nii.gz
 
 singularity run --cleanenv \
   --env FS_LICENSE=${FS_LICENSE} \
@@ -289,7 +292,7 @@ echo "Header change resampled SynthSeg segmentation"
 
 echo "Estimating regional volumes from segmentation in native space"
 
-segstats=${preprocessed_identifier}_desc-native_volumes.csv
+segstats=${scan_identifier}_desc-native_volumes.csv
 
 singularity run --cleanenv \
   --env FS_LICENSE=${FS_LICENSE} \
@@ -307,10 +310,9 @@ python ${TOOLPATH}/write-segstats-and-qc-output.py \
         ${OUTDIR}/${resampled_scan}/${segmentation_native} \
         ${OUTDIR}/${resampled_scan}/${segstats} \
         ${outqc} \
-        ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_volumes-and-qc.csv
+        ${OUTDIR}/${resampled_scan}/${scan_identifier}_volumes-and-qc.csv
 echo "All done! Congrats!"
 
-conda deactivate
 
 now=$(date +"%T")
 
