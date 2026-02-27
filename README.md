@@ -25,8 +25,19 @@ You will also need to obtain a FreeSurfer license file from: https://surfer.nmr.
   
 #### 3. Python
 You will need a working python installation with libraries:
+
+- python=3.10
 - numpy
+- pandas
 - nibabel
+- pip
+- antspyx
+
+Install a python environment using the `environment.yml` file. I installed it into a specific location `$ENV_PATH`: 
+
+```
+conda env create -p "$ENV_PATH" -f environment.yml
+```
 
 ## Usage
 Examplary usage:
@@ -44,7 +55,7 @@ Required arguments:
   --outdir PATH                    output directory
   --fs_singularity PATH            path to FreeSurfer Singularity (.sif)
   --fs_license PATH                FreeSurfer license.txt
-  --toolpath PATH                  path to tool folder
+  --toolpath PATH                  Path to SynthSeg resize and crop tool folder
 
 Optional:
   -h, --help                       show this help and exit
