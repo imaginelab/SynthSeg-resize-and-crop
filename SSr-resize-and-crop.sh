@@ -228,11 +228,22 @@ preprocessed_identifier=${resized_cropped_scan}
 outcsv=${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_volumes.csv
 outqc=${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_qc.csv
 outseg=${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_seg.nii.gz
+#synthsegpath=${rdspath}/growthcharts/tools/synthseg/SynthSeg/
 
 # If this file exists, run synthseg
 if [[ -f ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz ]]; then
-        python ${synthsegpath}/scripts/commands/SynthSeg_predict.py --i ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz --o ${outseg} --parc --robust --vol ${outcsv} --qc ${outqc}
-        echo "Ran SynthSeg;  Current time : $now"
+        #python ${synthsegpath}/scripts/commands/SynthSeg_predict.py --i ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz --o ${outseg} --parc --robust --vol ${outcsv} --qc ${outqc}
+	singularity run --cleanenv \
+		--env SUBJECTS_DIR="${OUTDIR}/${resampled_scan}/" \
+		-B ${OUTDIR}:/derivatives \
+		${FS_SINGULARITY} \
+		mri_synthseg \
+		--i /derivatives/${resampled_scan}/${preprocessed_identifier}.nii.gz \
+		--o /derivatives/${resampled_scan}/${preprocessed_identifier}_seg.nii.gz \
+		--parc --robust \
+		--vol /derivatives/${resampled_scan}/${preprocessed_identifier}_volumes.csv \
+		--qc /derivatives/${resampled_scan}/${preprocessed_identifier}_qc.csv
+	echo "Ran SynthSeg;  Current time : $now"
 fi
 
 
@@ -263,7 +274,7 @@ singularity run --cleanenv \
 
 echo "Resampled SynthSeg segmentation to input resized space"
 
-python change-resolution-header.py \
+python ${TOOLPATH}/change-resolution-header.py \
         -i ${OUTDIR}/${resampled_scan}/${segmentation_inverse} \
         -o ${OUTDIR}/${resampled_scan}/${segmentation_native} \
         -s ${inv_resolution} \
