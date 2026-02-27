@@ -23,11 +23,10 @@ singularity pull freesurfer_7.4.1.sif docker://freesurfer/freesurfer:7.4.1
 
 You will also need to obtain a FreeSurfer license file from: https://surfer.nmr.mgh.harvard.edu/fswiki/License
   
-#### 3. SynthSeg and python
+#### 3. Python
 You will need a working python installation with libraries:
 - numpy
 - nibabel
-- SynthSeg
 
 ## Usage
 Examplary usage:
@@ -51,7 +50,7 @@ Optional:
   -h, --help                       show this help and exit
 
 Example:
-  reconall-clinical-resampling.sh \
+  SynthSeg-resize-and-crop.sh \
     --subid sub-123456 \
     --age_days 180 \
     --input_file sub-12345_ses-01_..._T2w.nii.gz \
