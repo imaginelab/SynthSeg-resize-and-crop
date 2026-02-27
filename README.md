@@ -48,29 +48,29 @@ Usage:
 
 Required arguments:
   --subid SUBID                    e.g. sub-001
-  --age_days AGE                   integer days
+  --age_days AGE                   integer age in postmenstrual days
   --input_file PATH                path to input NIfTI (.nii.gz)
   --modality MOD                   T1w | T2w | FLAIR | ...
-  --scale SCALE                    e.g. 0.5
   --outdir PATH                    output directory
   --fs_singularity PATH            path to FreeSurfer Singularity (.sif)
   --fs_license PATH                FreeSurfer license.txt
-  --toolpath PATH                  Path to SynthSeg resize and crop tool folder
+  --toolpath PATH                  path to tool folder
 
 Optional:
+  --scale SCALE                    scaling factor (default: 0.5)
   -h, --help                       show this help and exit
 
 Example:
-  SynthSeg-resize-and-crop.sh \
+  reconall-clinical-resampling.sh \
     --subid sub-123456 \
-    --age_days 180 \
-    --input_file sub-12345_ses-01_..._T2w.nii.gz \
+    --age_days 300 \
+    --input_file sub-12345_ses-01_..._T1w.nii.gz \
     --modality T2w \
     --scale 0.5 \
     --outdir /out/sub-123456/ses-01/ \
     --fs_singularity /tools/freesurfer/freesurfer_7.4.1.sif \
     --fs_license /tools/freesurfer/license.txt \
-    --toolpath /tools/SynthSeg-resize-and-crop/
+    --toolpath /tools/SynthSeg-resize-and-crop/ \
 
 ```
 
