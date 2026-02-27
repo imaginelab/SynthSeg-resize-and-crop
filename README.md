@@ -74,5 +74,48 @@ Example:
 
 ```
 
+## Outputs
+
+Inputs
+```
+# Copy of input scan:
+${subject}_..._desc-native_T1w.nii.gz
+```
+
+Intermediate files:
+
+```
+# Resized input scan
+${subject}_..._res-${scaling_factor}_T1w.nii.gz
+
+# Brainmask generated on resized scan; skullstripped scan (not used further)
+${subject}_..._res-${scaling_factor}_desc-brainmask_T1w.nii.gz
+${subject}_..._res-${scaling_factor}_desc-skullstripped_T1w.nii.gz
+
+# Resized and cropped scan (brainmask applied to resized scan)
+${subject}_..._res-${scaling_factor}_desc-cropped_T1w.nii.gz
+
+# SynthSeg outputs run on resized and cropped scan
+${subject}_..._res-${scaling_factor}_desc-cropped_T1w_qc.csv
+${subject}_..._res-${scaling_factor}_desc-cropped_T1w_seg.nii.gz
+${subject}_..._res-${scaling_factor}_desc-cropped_T1w_volumes.csv
+
+# SynthSeg segmentation inverse rescaled
+${subject}_..._desc-inverse_T1w_seg.nii.gz
+```
+
+Output files in native space:
+
+```
+# SynthSeg segmentation back in native space
+${subject}_..._desc-native_T1w_seg.nii.gz
+
+# SynthSeg generated volumes in native space
+${subject}_..._desc-native_volumes.csv
+
+# Combined file of volumes calculated in native space, and qc scores
+${subject}_..._volumes-and-qc.csv
+```
+
 
 
