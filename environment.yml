@@ -1,0 +1,12 @@
+# SynthSeg-resize-and-crop.yml
+name: SynthSeg-resize-and-crop
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - nibabel
+  - pip
+  - pip:
+      - antspyx
