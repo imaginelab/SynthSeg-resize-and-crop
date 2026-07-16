@@ -182,9 +182,11 @@ fi
 resampled_scan=${scan_identifier}_res-${scale_factor}_${MODALITY}
 output_file=${OUTDIR}/${resampled_scan}/${resampled_scan}.nii.gz
 
+#if false; then
 mkdir -p ${OUTDIR}/${resampled_scan}/
 cp ${INPUT_FILE} ${OUTDIR}/${resampled_scan}/${scan_identifier}_desc-native_${MODALITY}.nii.gz
 python ${TOOLPATH}/change-resolution-header.py -i ${INPUT_FILE} -o ${output_file} -s ${scale_factor}
+#fi
 
 now=$(date +"%T")
 echo "Resized image;  Current time : $now"
@@ -198,6 +200,8 @@ echo "Crop data"
 resized_cropped_scan=${scan_identifier}_res-${scale_factor}_desc-cropped_${MODALITY}
 brainmask=${scan_identifier}_res-${scale_factor}_desc-brainmask_${MODALITY}
 skullstripped_scan=${scan_identifier}_res-${scale_factor}_desc-skullstripped_${MODALITY}
+
+#if false; then
 
 singularity run --cleanenv \
   --env FS_LICENSE=${FS_LICENSE} \
@@ -218,6 +222,7 @@ python ${TOOLPATH}/crop-decrop-using-mask.py crop \
 
 now=$(date +"%T")
 echo "Cropped image;  Current time : $now"
+#fi
 
 #############################################################
 # STEP 5: RUN SYNTHSEG
@@ -231,6 +236,7 @@ outqc=${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_qc.csv
 outseg=${OUTDIR}/${resampled_scan}/${preprocessed_identifier}_seg.nii.gz
 #synthsegpath=${rdspath}/growthcharts/tools/synthseg/SynthSeg/
 
+#if false; then
 # If this file exists, run synthseg
 if [[ -f ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz ]]; then
         #python ${synthsegpath}/scripts/commands/SynthSeg_predict.py --i ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz --o ${outseg} --parc --robust --vol ${outcsv} --qc ${outqc}
@@ -246,7 +252,7 @@ if [[ -f ${OUTDIR}/${resampled_scan}/${preprocessed_identifier}.nii.gz ]]; then
 		--qc /derivatives/${resampled_scan}/${preprocessed_identifier}_qc.csv
 	echo "Ran SynthSeg;  Current time : $now"
 fi
-
+#fi
 
 #############################################################
 # STEP 6: GET RESIZED PARCELLATION INTO NATIVE SPACE 
@@ -259,9 +265,8 @@ echo "Resampled segementation file to input file space"
 
 segmentation_inverse=${scan_identifier}_desc-inverse_${MODALITY}_seg.nii.gz
 segmentation_native=${scan_identifier}_desc-native_${MODALITY}_seg.nii.gz
-#segmentation_inverse=${preprocessed_identifier}_desc-inverse_seg.nii.gz
-#segmentation_native=${preprocessed_identifier}_desc-native_seg.nii.gz
 
+#if false; then
 singularity run --cleanenv \
   --env FS_LICENSE=${FS_LICENSE} \
   --env SUBJECTS_DIR="${OUTDIR}/${resampled_scan}/" \
@@ -284,33 +289,38 @@ python ${TOOLPATH}/change-resolution-header.py \
         --force-int
 
 echo "Header change resampled SynthSeg segmentation"
-
+#fi
 
 #############################################################
 # STEP 7: ESTIMATE VOLUMES IN NATIVE SPACE
 #############################################################
 
-echo "Estimating regional volumes from segmentation in native space"
+echo "Estimating regional volumes in native space"
 
-segstats=${scan_identifier}_desc-native_volumes.csv
+rescaled_vol_and_qc=${OUTDIR}/${resampled_scan}/${scan_identifier}_desc-native_volumes-and-qc.csv
+python ${TOOLPATH}/rescale-synthseg-outputs.py ${outcsv} ${outqc} ${scale_factor} ${rescaled_vol_and_qc} 
 
-singularity run --cleanenv \
-  --env FS_LICENSE=${FS_LICENSE} \
-  --env SUBJECTS_DIR="${OUTDIR}/${resampled_scan}/" \
-  -B ${FS_LICENSE}:/opt/freesurfer/license.txt \
-  -B ${OUTDIR}:/derivatives \
-  ${FS_SINGULARITY} \
-  mri_segstats \
-  --seg /derivatives/${resampled_scan}/${segmentation_native} \
-  --sum /derivatives/${resampled_scan}/${segstats} \
-  --ctab ${TOOLPATH}/FreeSurferColorLUT.txt
+#echo "Estimating regional volumes from segmentation in native space"
 
-echo "Aggregating outputs to csv"
-python ${TOOLPATH}/write-segstats-and-qc-output.py \
-        ${OUTDIR}/${resampled_scan}/${segmentation_native} \
-        ${OUTDIR}/${resampled_scan}/${segstats} \
-        ${outqc} \
-        ${OUTDIR}/${resampled_scan}/${scan_identifier}_volumes-and-qc.csv
+#segstats=${scan_identifier}_desc-native_volumes.csv
+
+#singularity run --cleanenv \
+#  --env FS_LICENSE=${FS_LICENSE} \
+#  --env SUBJECTS_DIR="${OUTDIR}/${resampled_scan}/" \
+#  -B ${FS_LICENSE}:/opt/freesurfer/license.txt \
+#  -B ${OUTDIR}:/derivatives \
+#  ${FS_SINGULARITY} \
+#  mri_segstats \
+#  --seg /derivatives/${resampled_scan}/${segmentation_native} \
+#  --sum /derivatives/${resampled_scan}/${segstats} \
+#  --ctab ${TOOLPATH}/FreeSurferColorLUT.txt
+
+#echo "Aggregating outputs to csv"
+#python ${TOOLPATH}/write-segstats-and-qc-output.py \
+#        ${OUTDIR}/${resampled_scan}/${segmentation_native} \
+#        ${OUTDIR}/${resampled_scan}/${segstats} \
+#        ${outqc} \
+#        ${OUTDIR}/${resampled_scan}/${scan_identifier}_volumes-and-qc.csv
 echo "All done! Congrats!"
 
 
